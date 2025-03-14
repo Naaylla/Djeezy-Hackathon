@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodeman": "^1.1.2"
+  }
+}
