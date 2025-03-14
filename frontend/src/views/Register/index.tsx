@@ -13,15 +13,30 @@ function App() {
 
   const startVideo = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-      
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-    } catch (err) {
-      console.error("Error accessing webcam:", err);
+    } catch (err: unknown) {
+      // Ensure err is a DOMException before accessing `.name`
+      if (err instanceof DOMException) {
+        if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+          console.error("No webcam found.");
+          alert("No webcam found on this device.");
+        } else if (err.name === "NotAllowedError") {
+          console.error("Webcam access denied.");
+          alert("Webcam access was denied. Please allow permissions.");
+        } else {
+          console.error("Webcam error:", err.message);
+        }
+      } else {
+        console.error("Unexpected error:", err);
+      }
     }
   };
+  
+  
 
   const loadModels = async () => {
     try {
