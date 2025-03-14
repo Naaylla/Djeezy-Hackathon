@@ -53,45 +53,55 @@ function App() {
     }
   };
 
-  const faceDetection = () => {
-    setInterval(async () => {
-      if (!videoRef.current || !canvasRef.current) return;
-
+  const faceDetection = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+  
+    try {
       const detections = await faceapi
-        .detectAllFaces(
+        .detectSingleFace(
           videoRef.current,
           new faceapi.TinyFaceDetectorOptions()
         )
         .withFaceLandmarks()
-        .withFaceExpressions();
-
-      if (!detections) return;
-
+        .withFaceExpressions()
+        .withFaceDescriptor();
+  
+      if (!detections) {
+        console.log("No face detected.");
+        return;
+      }
+  
+      console.log("Face detected!", detections);
+  
+      alert("Face detected! Check console for details.");
+  
       const displaySize = {
         width: videoRef.current.videoWidth,
         height: videoRef.current.videoHeight,
       };
-
+  
       let canvas = canvasRef.current?.querySelector("canvas");
       if (!canvas) {
         canvas = faceapi.createCanvasFromMedia(videoRef.current);
         canvasRef.current?.appendChild(canvas);
       }
-      
+  
+      faceapi.matchDimensions(canvas, displaySize);
+      const resizedDetections = faceapi.resizeResults(detections, displaySize);
+  
       const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-
-      faceapi.matchDimensions(canvas, displaySize);
-
-      const resizedDetections = faceapi.resizeResults(detections, displaySize);
-
+  
       faceapi.draw.drawDetections(canvas, resizedDetections);
       faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
       faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
-    }, 1000);
+    } catch (error) {
+      console.error("Error detecting face:", error);
+    }
   };
+  
 
   return (
     <div className="myapp">
