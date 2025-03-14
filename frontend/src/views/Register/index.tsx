@@ -72,8 +72,14 @@ function App() {
       }
   
       console.log("Face detected!", detections);
+      alert("Face detected! Camera will stop now.");
   
-      alert("Face detected! Check console for details.");
+      // Stop the camera
+      if (videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop()); // Stop all video tracks
+        videoRef.current.srcObject = null; // Clear video source
+      }
   
       const displaySize = {
         width: videoRef.current.videoWidth,
