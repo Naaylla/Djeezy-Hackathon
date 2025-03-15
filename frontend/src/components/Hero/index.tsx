@@ -3,15 +3,8 @@
 import { AnimatedStat } from "../UI/animated-stats";
 import { useIntersectionObserver } from "../../lib/use-intersection-observer";
 import { useEffect, useState } from "react";
-import ImageCarousel from "../UI/image-carousel";
-
-import hero_pic from "../../assets/hero/hero-pic.png";
 import hero_button from "../../assets/hero/hero-button.svg";
 import hero_skew from "../../assets/hero/hero-skew.svg";
-
-// const heroImages = [
-//   hero_pic,
-// ];
 
 export default function Hero() {
   const { ref, isInView } = useIntersectionObserver<HTMLDivElement>({
@@ -34,15 +27,21 @@ export default function Hero() {
           className="absolute left-0 top-0 h-full w-auto z-10"
         />
 
-        <div className="absolute right-0 top-0 w-full h-full z-0 bg-red-500">
-        </div>
+        <div className="absolute right-0 top-0 w-full h-full z-0 bg-white"></div>
 
         <div className="relative z-20 ml-20">
           <p className="text-6xl font-bold text-black">9OUFA</p>
           <p className="text-lg text-gray-700">Your gateway to volunteering</p>
           <button className="mt-4">
-            <img src={hero_button || "/placeholder.svg"} alt="Donate Now" className="cursor-pointer"/>
+            <img
+              src={hero_button || "/placeholder.svg"}
+              alt="Donate Now"
+              className="cursor-pointer"
+            />
           </button>
+        </div>
+
+        <div className="absolute bottom-0 right-10 w-64 h-64">
         </div>
       </div>
 
@@ -61,7 +60,7 @@ export default function Hero() {
             transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
-          IN 1,5 YEARS OF PLATFORM'S OPERATION
+          IN 1.5 YEARS OF PLATFORM'S OPERATION
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-12 max-w-6xl w-full">
@@ -88,7 +87,6 @@ export default function Hero() {
             label="Nonprofits partnered with our platform"
             delay={3}
           />
-
           <AnimatedStat
             value={200000}
             suffix="+"
