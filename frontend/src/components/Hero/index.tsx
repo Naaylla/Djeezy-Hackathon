@@ -5,6 +5,7 @@ import { useIntersectionObserver } from "../../lib/use-intersection-observer";
 import { useEffect, useState } from "react";
 import hero_button from "../../assets/hero/hero-button.svg";
 import hero_skew from "../../assets/hero/hero-skew.svg";
+import hero_pic from "../../assets/hero/hero-pic.png";
 
 export default function Hero() {
   const { ref, isInView } = useIntersectionObserver<HTMLDivElement>({
@@ -30,7 +31,7 @@ export default function Hero() {
         <div className="absolute right-0 top-0 w-full h-full z-0 bg-white"></div>
 
         <div className="relative z-20 ml-20">
-          <p className="text-6xl font-bold text-black">9OUFA</p>
+          <p className="text-6xl font-bold text-red">9OUFA</p>
           <p className="text-lg text-gray-700">Your gateway to volunteering</p>
           <button className="mt-4">
             <img
@@ -41,7 +42,8 @@ export default function Hero() {
           </button>
         </div>
 
-        <div className="absolute bottom-0 right-10 w-64 h-64">
+        <div className="absolute right-0 top-0 w-auto h-full object-cover z-0">
+          <img src={hero_pic} alt="" />
         </div>
       </div>
 
@@ -67,7 +69,7 @@ export default function Hero() {
           <AnimatedStat
             value={1}
             label="Families positively impacted"
-            formatter={(value) => `${value}M$`}
+            formatter={(value) => `${value}M`}
             delay={0}
           />
           <AnimatedStat
