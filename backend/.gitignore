@@ -27,7 +27,3 @@ Thumbs.db
 # Build files
 dist/
 build/
-
-# Database files (optional)
-*.sqlite
-*.sqlite-journal
