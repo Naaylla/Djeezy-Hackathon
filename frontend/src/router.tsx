@@ -9,9 +9,13 @@ const router = createBrowserRouter([
     path: "/",
     // element: <Layout />,
     children: [
-      { path: "/", element: <Register /> },
+      { path: "/", element: <Home /> },
       { path: "/donate", element: <Donate /> },
+<<<<<<< HEAD
       { path: "/register", element: <Home /> },
+=======
+      { path: "/register", element: <Register /> },
+>>>>>>> origin/lemon-front
     ],
   },
 ]);
