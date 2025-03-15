@@ -1,5 +1,6 @@
 import logo from "../../../assets/header/logo.svg";
 import login_button from "../../../assets/header/login_button.svg";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   return (
@@ -12,10 +13,12 @@ export default function Header() {
         <li className="cursor-pointer">Sponsors</li>
         <li className="cursor-pointer">Contact</li>
       </ul>
+      <Link to="/Login">
+        <button className="flex items center ">
+          <img src={login_button} className="cursor-pointer"/>
+        </button>
+      </Link>
 
-      <button className="flex items center ">
-        <img src={login_button} className="cursor-pointer" />
-      </button>
     </div>
   );
 }
