@@ -21,7 +21,7 @@ const ContactUs: React.FC = () => {
         />
         <button
             style={{ backgroundColor: '#000000', color: '#FFFFFF' }}
-            className="font-semibold py-2 px-6 rounded-sm transition duration-300 hover:bg-gray-800"
+            className="font-semibold py-2 px-6 rounded-sm transition duration-300 hover:bg-gray-800 cursor-pointer"
         >
         Submit
         </button>

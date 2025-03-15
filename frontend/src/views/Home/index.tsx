@@ -1,6 +1,6 @@
 
 
-import ContactUs from "../../components/Contact us"
+import ContactUs from "../../components/ContactUs"
 import Hero from "../../components/Hero";
 
 export default function Home() {

@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-wrap justify-between items-center">
           <div className="w-full md:w-1/3 mb-6 md:mb-0">
             <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 cursor-pointer">
               <a href="https://facebook.com" className="hover:text-gray-600"><FaFacebook size={24} /></a>
               <a href="https://twitter.com" className="hover:text-gray-600"><FaTwitter size={24} /></a>
               <a href="https://instagram.com" className="hover:text-gray-600"><FaInstagram size={24} /></a>
