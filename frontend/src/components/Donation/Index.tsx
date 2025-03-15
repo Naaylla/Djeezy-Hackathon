@@ -1,76 +1,95 @@
-import { useState } from 'react';
-import model_pic from "../../assets/model_pic.png";
+import { useState } from "react";
 
-export default function Donation() {
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+export default function FundNodes() {
+  const [selectedNode, setSelectedNode] = useState(null);
 
-  const handlePrev = () => {
-    setCurrentCardIndex((prevIndex) => (prevIndex === 0 ? 2 : prevIndex - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentCardIndex((prevIndex) => (prevIndex === 2 ? 0 : prevIndex + 1));
-  };
-
-  const cards = [
+  const nodes = [
     {
-      name: 'The Ahmeds',
-      description: "A struggling family of five. Father lost his job. Mother's income isn't enough.",
+      id: 1,
+      x: 150,
+      y: 200,
+      color: "bg-red",
+      title: "Node 1",
+      description: "Description for Node 1",
     },
     {
-      name: 'The Adams',
-      description: 'A middle-class family drowning in debt after a medical emergency, now struggling to keep their home.',
+      id: 2,
+      x: 300,
+      y: 300,
+      color: "bg-red",
+      title: "Node 2",
+      description: "Description for Node 2",
     },
     {
-      name: 'The Hachimi',
-      description: 'A single mother of three, barely affording rent and food.',
+      id: 3,
+      x: 450,
+      y: 250,
+      color: "bg-red",
+      title: "Node 3",
+      description: "Description for Node 3",
+    },
+    {
+      id: 4,
+      x: 600,
+      y: 350,
+      color: "bg-yellow",
+      title: "Baraka",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
     },
   ];
 
   return (
-    <div id="Donate" className=" py-10" style={{backgroundColor:'#FEF9E1'}}>
-      <div className="container mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-8">DONATIONS</h2>
-        <div className="flex flex-col md:flex-row justify-center gap-8">
-          {cards.map((card, index) => (
-            <div
-              key={index}
-              className={`rounded-xl shadow-md p-6 w-full max-w-sm h-[450px] w-[350px] ${
-                index === currentCardIndex ? 'block' : 'hidden md:block'
-              }`} style={{backgroundColor : "C14600"}}
-            >
-              <img
-                src={model_pic}
-                alt={card.name}
-                className="w-24 h-24 mx-auto mb-4 rounded-xl"
+    <div className="relative w-full h-screen bg-gray-200 flex justify-end items-center">
+      {/* SVG for lines */}
+      <svg className="absolute w-full h-full">
+        {nodes.map((node, index) => {
+          if (index < nodes.length - 1) {
+            return (
+              <line
+                key={index}
+                x1={nodes[index].x + 20}
+                y1={nodes[index].y + 20}
+                x2={nodes[index + 1].x + 20}
+                y2={nodes[index + 1].y + 20}
+                stroke="black"
+                strokeWidth="1.5"
               />
-              <h3 className="text-xl font-semibold mb-2">{card.name}</h3>
-              <p className="text-gray-600 mb-4">{card.description}</p>
-              <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Donate
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="mt-5 flex justify-center">
-          <button
-            className="bg-gray-200 hover:bg-gray-300 rounded-full p-2 mx-2"
-            onClick={handlePrev}
-          >
-            &larr;
-          </button>
-          <button
-            className="bg-gray-200 hover:bg-gray-300 rounded-full p-2 mx-2"
-            onClick={handleNext}
-          >
-            &rarr;
-          </button>
-        </div>
+            );
+          }
+          return null;
+        })}
+      </svg>
 
-        <div className="mt-8">
-          <button className="text-blue-500 hover:underline">See more</button>
+      {/* Nodes (Clickable) */}
+      {nodes.map((node) => (
+        <div
+          key={node.id}
+          className={`absolute w-10 h-10 ${node.color} rounded-full shadow-lg cursor-pointer`}
+          style={{ left: node.x, top: node.y }}
+          onClick={() => setSelectedNode(node)}
+        ></div>
+      ))}
+
+      {/* Card Popup */}
+      {selectedNode && (
+        <div className="absolute left-10 top-30 w-100 bg-red text-white p-4 rounded-lg">
+          <img
+            src="https://via.placeholder.com/300" // Replace with actual image
+            alt={selectedNode.title}
+            className="w-full h-32 object-cover rounded-lg"
+          />
+          <h2 className="text-xl font-bold mt-2">{selectedNode.title}</h2>
+          <p className="text-sm mt-2">{selectedNode.description}</p>
+          <button className="mt-4 px-4 py-2 bg-yellow text-white rounded-md shadow-md">
+            Donate
+          </button>
         </div>
-      </div>
+      )}
+
+      {/* "Start Fund" Button */}
+      <button className="absolute top-6 right-6 px-6 py-3 bg-orange-400 text-white rounded-lg shadow-lg">
+        Start Fund
+      </button>
     </div>
   );
 }
