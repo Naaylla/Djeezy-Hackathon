@@ -1,9 +1,8 @@
-import { AnimatedStat } from "../ui/animated-stats";
+import { AnimatedStat } from "../UI/animated-stats";
 import { useIntersectionObserver } from "../../lib/use-intersection-observer";
 import { useEffect, useState, useRef } from "react";
 import hero_button from "../../assets/hero/hero-button.svg";
 import hero_skew from "../../assets/hero/hero-skew.svg";
-import hero_pic from "../../assets/hero/hero-pic.png";
 
 export default function Hero() {
   const { ref, isInView } = useIntersectionObserver<HTMLDivElement>({

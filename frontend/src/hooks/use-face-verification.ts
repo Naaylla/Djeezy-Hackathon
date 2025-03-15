@@ -19,6 +19,10 @@ export function useFaceVerification() {
     password: "",
     confirmPassword: ""
   })
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoad, setIsLoad] = useState(false); 
+
   const [idCardImage, setIdCardImage] = useState<File | null>(null)
   const [idFaceDescriptor, setIdFaceDescriptor] = useState<Float32Array | null>(null)
   const [isIdVerified, setIsIdVerified] = useState(false)
@@ -33,9 +37,10 @@ export function useFaceVerification() {
   const [loadingStage, setLoadingStage] = useState("")
 
   const mediaStreamRef = useRef<MediaStream | null>(null)
-  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const faceMatchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const processingImageRef = useRef<boolean>(false)
-  const faceMatchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const matchAttemptsRef = useRef<number>(0)
 
   useEffect(() => {
@@ -53,10 +58,10 @@ export function useFaceVerification() {
     return () => {
       stopVideo()
       if (detectionIntervalRef.current) {
-        clearInterval(detectionIntervalRef.current)
+        detectionIntervalRef.current = null; 
       }
       if (faceMatchTimeoutRef.current) {
-        clearTimeout(faceMatchTimeoutRef.current)
+        faceMatchTimeoutRef.current = null;
       }
     }
   }, [])
@@ -241,86 +246,118 @@ export function useFaceVerification() {
     }
   }
 
+
+  const handleSubmitToBackend = async () => {
+    setIsLoad(true);
+    setError("");
+    setIsSuccess(false);
+  
+    try {
+      const response = await fetch("http://localhost:5000/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed.");
+      }
+  
+      setIsSuccess(true);
+      setSuccessMessage("✅ Registered successfully!");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    } finally {
+      setIsLoad(false);
+    }
+  };
   const detectAndCompareFace = () => {
     if (!videoRef.current || !idFaceDescriptor) {
-      setErrorMessage("⚠️ Video or ID face data not available.")
-      setIsLoading(false)
-      return
+      setErrorMessage("⚠️ Video or ID face data not available.");
+      setIsLoading(false);
+      return;
     }
-
-    const video = videoRef.current
-    setLoadingStage("Comparing your face with ID...")
-
-    if (detectionIntervalRef.current) {
-      clearInterval(detectionIntervalRef.current)
+  
+    const video = videoRef.current;
+    setLoadingStage("Comparing your face with ID...");
+  
+    // Ensure any previous intervals are cleared before starting a new one
+    if (detectionIntervalRef.current !== null) {
+      clearInterval(detectionIntervalRef.current);
+      detectionIntervalRef.current = null;
     }
-
-    let frameCount = 0
-
+  
+    let frameCount = 0;
+  
     detectionIntervalRef.current = setInterval(async () => {
-      if (!video || !idFaceDescriptor) return
-
-      matchAttemptsRef.current++
-
+      if (!video || !idFaceDescriptor) return;
+  
+      matchAttemptsRef.current++;
+  
       if (matchAttemptsRef.current > FaceRecognitionLib.MAX_MATCH_ATTEMPTS) {
-        if (detectionIntervalRef.current) {
-          clearInterval(detectionIntervalRef.current)
-          detectionIntervalRef.current = null
-        }
-        setErrorMessage("⚠️ Face verification failed. The face does not match the ID card.")
-        setIsLoading(false)
-        setLoadingStage("")
-        setFaceVerificationFailed(true)
-        stopVideo()
-        return
+        clearInterval(detectionIntervalRef.current!);
+        detectionIntervalRef.current = null;
+        setErrorMessage("⚠️ Face verification failed. The face does not match the ID card.");
+        setIsLoading(false);
+        setLoadingStage("");
+        setFaceVerificationFailed(true);
+        stopVideo();
+        return;
       }
-
-      frameCount++
-      if (frameCount % 2 !== 0) return
-
-      if (processingImageRef.current) return
-
-      processingImageRef.current = true
-
+  
+      frameCount++;
+      if (frameCount % 2 !== 0) return;
+      if (processingImageRef.current) return;
+  
+      processingImageRef.current = true;
+  
       try {
-        const detections = await FaceRecognitionLib.detectFaceInVideo(video)
-
+        const detections = await FaceRecognitionLib.detectFaceInVideo(video);
+  
         if (!detections) {
-          setErrorMessage("⚠️ Please position your face in the center of the camera.")
-          processingImageRef.current = false
-          return
+          setErrorMessage("⚠️ Please position your face in the center of the camera.");
+          processingImageRef.current = false;
+          return;
         }
-
-        setErrorMessage(null)
-
-        const distance = FaceRecognitionLib.compareFaceDescriptors(detections.descriptor, idFaceDescriptor)
-        setCurrentMatchDistance(distance)
-
+  
+        setErrorMessage(null);
+        const distance = FaceRecognitionLib.compareFaceDescriptors(detections.descriptor, idFaceDescriptor);
+        setCurrentMatchDistance(distance);
+  
         if (distance < FaceRecognitionLib.FACE_MATCH_THRESHOLD) {
-          if (detectionIntervalRef.current) {
-            clearInterval(detectionIntervalRef.current)
-            detectionIntervalRef.current = null
+          clearInterval(detectionIntervalRef.current!);
+          detectionIntervalRef.current = null;
+  
+          if (faceMatchTimeoutRef.current !== null) {
+            clearTimeout(faceMatchTimeoutRef.current);
+            faceMatchTimeoutRef.current = null;
           }
-          if (faceMatchTimeoutRef.current) {
-            clearTimeout(faceMatchTimeoutRef.current)
-            faceMatchTimeoutRef.current = null
-          }
-
-          setIsVerified(true)
-          setIsLoading(false)
-          setSuccessMessage("✅ Registered successfully!")
-          setLoadingStage("")
-
-          stopVideo()
+  
+          setIsVerified(true);
+          setIsLoading(false);
+          setSuccessMessage("✅ Face Verified!");
+          setLoadingStage("");
+  
+          stopVideo();
+  
+          // ✅ Send data to backend after successful verification
+          await handleSubmitToBackend();
         }
-
-        processingImageRef.current = false
+  
+        processingImageRef.current = false;
       } catch (error) {
-        console.error("Face detection error:", error)
-        processingImageRef.current = false
+        console.error("Face detection error:", error);
+        processingImageRef.current = false;
       }
-    }, 100)
-  }
+    }, 100);
+  };
+  
 
   const stopVideo = () => {
     if (mediaStreamRef.current) {

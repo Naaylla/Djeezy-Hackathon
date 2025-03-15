@@ -30,6 +30,7 @@ export default function Register() {
     FACE_MATCH_THRESHOLD,
   } = useFaceVerification()
 
+
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
