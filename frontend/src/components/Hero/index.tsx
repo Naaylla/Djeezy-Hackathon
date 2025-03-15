@@ -21,7 +21,7 @@ export default function Hero() {
 
   return (
     <div className="bg-beige w-full">
-      <div className="relative w-full h-[500px] flex items-center bg-beige overflow-hidden">
+      <div className="relative w-full h-[480px] flex items-center bg-beige overflow-hidden">
         <img
           src={hero_skew || "/placeholder.svg"}
           alt="Skew background"
