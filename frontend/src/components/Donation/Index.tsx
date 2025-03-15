@@ -1,14 +1,23 @@
 import { useState } from "react";
 
-export default function FundNodes() {
-  const [selectedNode, setSelectedNode] = useState(null);
+type NodeType = {
+  id: number;
+  x: number;
+  y: number;
+  color: string;
+  title: string;
+  description: string;
+};
 
-  const nodes = [
+export default function FundNodes() {
+  const [selectedNode, setSelectedNode] = useState<NodeType | null>(null);
+
+  const nodes: NodeType[] = [
     {
       id: 1,
       x: 150,
       y: 200,
-      color: "bg-red",
+      color: "bg-red-600",
       title: "Node 1",
       description: "Description for Node 1",
     },
@@ -16,7 +25,7 @@ export default function FundNodes() {
       id: 2,
       x: 300,
       y: 300,
-      color: "bg-red",
+      color: "bg-red-600",
       title: "Node 2",
       description: "Description for Node 2",
     },
@@ -24,7 +33,7 @@ export default function FundNodes() {
       id: 3,
       x: 450,
       y: 250,
-      color: "bg-red",
+      color: "bg-red-600",
       title: "Node 3",
       description: "Description for Node 3",
     },
@@ -32,14 +41,14 @@ export default function FundNodes() {
       id: 4,
       x: 600,
       y: 350,
-      color: "bg-yellow",
-      title: "Baraka",
+      color: "bg-yellow-400",
+      title: "Kesh Doner",
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
     },
   ];
 
   return (
-    <div className="relative w-full h-screen bg-gray-200 flex justify-end items-center">
+    <div className="relative w-full h-screen bg-gray-200 flex justify-center items-center">
       {/* SVG for lines */}
       <svg className="absolute w-full h-full">
         {nodes.map((node, index) => {
@@ -72,7 +81,7 @@ export default function FundNodes() {
 
       {/* Card Popup */}
       {selectedNode && (
-        <div className="absolute left-10 top-30 w-100 bg-red text-white p-4 rounded-lg">
+        <div className="absolute left-10 top-10 w-80 bg-orange-700 text-white p-4 rounded-lg shadow-lg">
           <img
             src="https://via.placeholder.com/300" // Replace with actual image
             alt={selectedNode.title}
@@ -80,7 +89,7 @@ export default function FundNodes() {
           />
           <h2 className="text-xl font-bold mt-2">{selectedNode.title}</h2>
           <p className="text-sm mt-2">{selectedNode.description}</p>
-          <button className="mt-4 px-4 py-2 bg-yellow text-white rounded-md shadow-md">
+          <button className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-md shadow-md">
             Donate
           </button>
         </div>
