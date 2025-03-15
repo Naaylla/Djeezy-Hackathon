@@ -3,54 +3,63 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const { access } = require("fs");
-
 // @desc Register a user
 // @route POST /api/users/register
 // @access Public
 const registerUser = asyncHandler(async (req, res) => {
-    console.log(req.body);
-    const { firstname, lastname, email, password, nationalCardNumber, birthDate } = req.body;
-    if (!firstname || !lastname || !email || !password || !nationalCardNumber || !birthDate) {
-        res.status(400);
-        throw new Error("Please fill in all fields");
-        return;
-    }
-    const userAvailable = await User.findOne({ nationalCardNumber });
-    if (userAvailable) {
-        res.status(400);
-        throw new Error("User already exists");
-        return;
-    }
+  console.log(req.body);
+  const { firstname, lastname, email, password, nationalCardNumber, birthDate, idCardPicture } = req.body;
 
-    const userAvailable2 = await User.findOne({ email });
-    if (userAvailable) {
-        res.status(400);
-        throw new Error("User already exists");
-        return;
-    }
+  // Validate that all fields are provided
+  if (!firstname || !lastname || !email || !password || !nationalCardNumber || !birthDate || !idCardPicture) {
+      res.status(400);
+      throw new Error("Please fill in all fields");
+      return;
+  }
 
-    //hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("hashed Pass", password);
+  // Check if the user with the same national card number exists
+  const userAvailable = await User.findOne({ nationalCardNumber });
+  if (userAvailable) {
+      res.status(400);
+      throw new Error("User already exists");
+      return;
+  }
 
-    const user = await User.create({
-        firstname,
-        lastname,
-        email,
-        password: hashedPassword,
-        nationalCardNumber,
-        birthDate,
-    });
+  // Check if the user with the same email exists
+  const userAvailable2 = await User.findOne({ email });
+  if (userAvailable2) {
+      res.status(400);
+      throw new Error("User already exists");
+      return;
+  }
 
-    console.log("User created", user);
-    if (user)
-    {
-        res.status(201).json({_id: user.id, firstname: user.firstname, email: user.email});
-    } else
-    {
-        res.status(400);
-        throw new Error("Invalid user data");
-    }
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(password, 10);
+  console.log("hashed Pass", password);
+
+  // Create the new user
+  const user = await User.create({
+      firstname,
+      lastname,
+      email,
+      password: hashedPassword,
+      nationalCardNumber,
+      birthDate,
+      idCardPicture
+  });
+
+  console.log("User created", user);
+  if (user) {
+      res.status(201).json({ 
+          _id: user.id, 
+          firstname: user.firstname, 
+          email: user.email,
+          idCardPicture: user.idCardPicture
+      });
+  } else {
+      res.status(400);
+      throw new Error("Invalid user data");
+  }
 });
 
 // @desc Login a user

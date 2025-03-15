@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     birthDate: {
         type: Date,
         required: [true, "Please enter your birth date"],
+    },
+    idCardPicture: {
+        type: String, // URL or path to the ID card image
+        required: [true, "Please upload your ID card picture"],
     }
 }, { timestamps: true });
 

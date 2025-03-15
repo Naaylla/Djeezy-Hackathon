@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
+const { getReceiverDonations, getDonorDonations, getDonationByID, getCampaignDonations } = require("../controllers/donationController");
 
-router.post("/donate", (req, res) => {
-    console.log(req.body);
-    res.json({ message: "Donation successful" });
-});
+// Get a specific donation by its ID
+router.get("/donation/:id", getDonationByID);
 
-router.get("/useDonations", (req, res) => {
-    res.json({ message: "Donations retrieved" });
-});
+// Get all donations for a specific campaign
+router.get("/campaign/:campaignId/donations", getCampaignDonations);
 
-router.get("/donation/:id", (req, res) => {
-    res.json({ message: "Donation retrieved" });
-});
+// Get all donations received by a specific receiver
+router.get("/receiver/:receiverName/donations", getReceiverDonations);
+
+// Get all donations made by a specific donor
+router.get("/donor/:donorID/donations", getDonorDonations);
 
 module.exports = router;

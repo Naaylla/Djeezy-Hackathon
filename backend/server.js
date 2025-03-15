@@ -3,7 +3,6 @@ const connectDB = require("./config/dbConection");
 const dotenv = require("dotenv").config();
 const errorHandler = require('./middleware/errorHandler');
 const { getContract } = require('./blockchain/network/networkConnect');
-const enrollAdmin = require('./blockchain/network/enrollAdmin');
 
 connectDB();
 getContract();
