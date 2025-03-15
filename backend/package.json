@@ -19,6 +19,7 @@
     "fabric-ca-client": "^2.2.20",
     "fabric-contract-api": "^2.5.8",
     "fabric-network": "^2.2.20",
+    "fabric-shim": "^2.5.8",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.1"
   },

@@ -8,12 +8,13 @@ class DonationContract extends Contract {
         console.log('Initializing Ledger...');
     }
 
-    async donate(ctx, donorID, receiverName, amount) {
+    async donate(ctx, donorID, receiverName, amount, campaignId) {
         const donationID = ctx.stub.createCompositeKey('Donation', [donorID, Date.now().toString()]);
         const donation = {
-            donorID, // Anonymous ID
+            donorID, 
             receiverName,
             amount,
+            campaignId,  
             timestamp: new Date().toISOString()
         };
 
@@ -42,6 +43,32 @@ class DonationContract extends Contract {
         for await (const res of iterator) {
             const donation = JSON.parse(res.value.toString());
             if (donation.donorID === donorID) {
+                donations.push(donation);
+            }
+        }
+
+        return JSON.stringify(donations);
+    }
+
+    async getDonationByID(ctx, donationID) {
+        // Retrieve the donation from the ledger using the donationID
+        const donationBytes = await ctx.stub.getState(donationID);
+        if (!donationBytes || donationBytes.length === 0) {
+            throw new Error(`Donation with ID ${donationID} does not exist`);
+        }
+
+        // Parse and return the donation
+        const donation = JSON.parse(donationBytes.toString());
+        return JSON.stringify(donation);
+    }
+
+    async getCampaignDonations(ctx, campaignId) {
+        const iterator = await ctx.stub.getStateByPartialCompositeKey('Donation', []);
+        const donations = [];
+
+        for await (const res of iterator) {
+            const donation = JSON.parse(res.value.toString());
+            if (donation.campaignId === campaignId) {
                 donations.push(donation);
             }
         }

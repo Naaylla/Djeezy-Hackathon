@@ -18,6 +18,11 @@ const donationCampaignSchema = new mongoose.Schema({
     attachments: {
         type: [String], // List of image URLs
         default: [],
+    },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId, // This will store the ObjectId of the user who created the campaign
+        ref: 'User', // Assuming you have a User model and it is linked to the user collection
+        required: [true, "User ID is required"], // You can make it required if necessary
     }
 }, { timestamps: true });
 

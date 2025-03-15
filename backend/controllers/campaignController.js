@@ -1,10 +1,20 @@
 const DonationCampaign = require("../models/campaignModel");
 const asyncHandler = require("express-async-handler");
+const { gateway, network, contract } = require('../blockchain/network/networkConnect');
 
 const createCampaign = async (req, res) => {
     try {
         const { name, description, amount, attachments } = req.body;
-        const campaign = new DonationCampaign({ name, description, amount, attachments });
+        const userId = req.user.id; // Assuming user ID is in req.user.id
+
+        const campaign = new DonationCampaign({
+            name,
+            description,
+            amount,
+            attachments,
+            userId // Store the user who created the campaign
+        });
+
         await campaign.save();
         res.status(201).json({ message: "Campaign created successfully", campaign });
     } catch (error) {
@@ -31,11 +41,18 @@ const donateToCampaign = async (req, res) => {
         const campaign = await DonationCampaign.findById(req.params.id);
         if (!campaign) return res.status(404).json({ message: "Campaign not found" });
 
-        campaign.amount += amount; // Increase the total amount
-        await campaign.save();
+        const donorID = req.user.id; 
+        const receiverName = campaign.name; 
 
-        res.status(200).json({ message: "Donation successful", campaign });
+        const donationResult = await contract.submitTransaction('donate', donorID, receiverName, amount.toString());
+
+        res.status(200).json({
+            message: 'Donation successful',
+            campaign,
+            donationDetails: JSON.parse(donationResult.toString())  // Return the transaction result (donation details)
+        });
     } catch (error) {
+        console.error(error);
         res.status(400).json({ error: error.message });
     }
 };
@@ -70,4 +87,3 @@ const getCampaign = async (req, res) => {
 };
 
 module.exports = { createCampaign, updateCampaign, donateToCampaign, getCampaign };
-
