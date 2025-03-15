@@ -6,6 +6,7 @@ export default function Header() {
   return (
     <div className="flex items-center justify-between p-4 bg-beige">
       <img src={logo} alt="Logo" className="h-10" />
+
       <ul className="flex gap-[83px] font-medium">
         <li className="cursor-pointer">Donate</li>
         <li className="cursor-pointer">Funds</li>
@@ -13,12 +14,12 @@ export default function Header() {
         <li className="cursor-pointer">Sponsors</li>
         <li className="cursor-pointer">Contact</li>
       </ul>
+
       <Link to="/Login">
         <button className="flex items center ">
-          <img src={login_button} className="cursor-pointer"/>
+          <img src={login_button} className="cursor-pointer" />
         </button>
       </Link>
-
     </div>
   );
 }

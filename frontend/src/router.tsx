@@ -4,19 +4,21 @@ import Home from "./views/Home";
 import Donate from "./views/Donate";
 import Register from "./views/Register";
 import Login from "./views/Login";
+import Profile from "./components/Profile";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
-  { path: "/register", element: <Register /> }, 
+  { path: "/register", element: <Register /> },
   {
     path: "/",
     element: <Layout />,
     children: [
-      { path: "", element: <Home /> }, 
+      { path: "", element: <Home /> },
       { path: "/donate", element: <Donate /> },
+      { path: "/profile", element: <Profile /> },
     ],
   },
-  { path: "/register", element: <Register /> } 
+  { path: "/register", element: <Register /> },
 ]);
 
 export default function Routes() {
