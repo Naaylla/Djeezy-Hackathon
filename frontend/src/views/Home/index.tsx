@@ -8,7 +8,6 @@ export default function Home() {
     return (
         <div>
             <Hero />
-            <Donation/>
             <Mission/>
             <Sponsors/>
             <ContactUs/>
