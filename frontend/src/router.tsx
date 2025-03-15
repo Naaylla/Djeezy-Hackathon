@@ -4,6 +4,7 @@ import Home from "./views/Home";
 import Donate from "./views/Donate";
 import Register from "./views/Register";
 import Login from "./views/Login";
+import Fund from "./components/Fund";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -14,6 +15,7 @@ const router = createBrowserRouter([
     children: [
       { path: "", element: <Home /> }, 
       { path: "/donate", element: <Donate /> },
+      { path: "/fund", element: <Fund /> },
     ],
   },
   { path: "/register", element: <Register /> } 
