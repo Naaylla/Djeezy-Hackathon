@@ -328,6 +328,7 @@ export default function FaceRecognition() {
                   3
                 </span>
                 <span className="text-xs">Face Scan</span>
+                <h1>debugging purposes here</h1>
               </li>
             </ol>
           </div>
