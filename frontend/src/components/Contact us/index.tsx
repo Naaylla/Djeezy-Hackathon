@@ -5,7 +5,7 @@ const ContactUs: React.FC = () => {
     <div
       id="contact"
       style={{ backgroundColor: '#C14600', minHeight: '400px' }}
-      className="flex flex-col justify-center items-center p-8 rounded-lg shadow-md text-center"
+      className="flex flex-col justify-center items-center p-8 shadow-md text-center"
     >
       <h1 style={{ color: '#FEF9E1' }} className="text-5xl font-bold mb-4">
         Contact Us!
