@@ -39,7 +39,7 @@ export default function Fund() {
     },
   ];
 
-  const getCardIndex = (offset) => {
+  const getCardIndex = (offset: number) => {
     let newIndex = currentCardIndex + offset;
     if (newIndex < 0) newIndex = cards.length - 1;
     if (newIndex >= cards.length) newIndex = 0;
@@ -58,7 +58,7 @@ export default function Fund() {
           >
             &larr;
           </button>
-          {[getCardIndex(-1), currentCardIndex, getCardIndex(1)].map((index, mapIndex) => (
+          {[getCardIndex(-1), currentCardIndex, getCardIndex(1)].map((index) => (
             <div
               key={index}
               className={`rounded-xl shadow-md p-6 w-full max-w-md w-[400px] transition-transform duration-300 ${
