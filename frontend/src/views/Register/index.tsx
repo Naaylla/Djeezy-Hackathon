@@ -9,6 +9,7 @@ import Tesseract from "tesseract.js";
 export default function FaceRecognition() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,19 +28,34 @@ export default function FaceRecognition() {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [cameraStatus, setCameraStatus] = useState<string>("waiting");
   const [showCamera, setShowCamera] = useState(false);
+  const [faceVerificationFailed, setFaceVerificationFailed] = useState(false);
+
+  // Loading stage state
+  const [loadingStage, setLoadingStage] = useState("");
 
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const processingImageRef = useRef<boolean>(false);
+  const faceMatchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const matchAttemptsRef = useRef<number>(0);
+  const MAX_MATCH_ATTEMPTS = 30; // About 3 seconds with 100ms interval
 
-  // Load face-api.js models
+  // Load face-api.js models - optimized to load faster
   useEffect(() => {
     const loadModels = async () => {
       try {
-        await faceapi.nets.ssdMobilenetv1.loadFromUri("/models");
-        await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
-        await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
+        setLoadingStage("Loading face detection models...");
+
+        // Only load the essential models for faster loading
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri("/models"), // Faster than SSD Mobilenet
+          faceapi.nets.faceLandmark68TinyNet.loadFromUri("/models"), // Tiny version is faster
+          faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
+        ]);
+
         console.log("📚 Models loaded successfully");
         setModelsLoaded(true);
+        setLoadingStage("");
       } catch (err) {
         console.error("Error loading models:", err);
         setErrorMessage(
@@ -56,6 +72,9 @@ export default function FaceRecognition() {
       if (detectionIntervalRef.current) {
         clearInterval(detectionIntervalRef.current);
       }
+      if (faceMatchTimeoutRef.current) {
+        clearTimeout(faceMatchTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -65,10 +84,8 @@ export default function FaceRecognition() {
       // Ensure we have a clean start
       stopVideo();
 
-      // Small delay to ensure DOM is updated
-      setTimeout(() => {
-        startVideo();
-      }, 100);
+      // Start video immediately
+      startVideo();
     }
   }, [isIdVerified, showCamera]);
 
@@ -85,10 +102,68 @@ export default function FaceRecognition() {
     }
   };
 
-  // Extract text from ID card using OCR (Tesseract.js)
+  // Optimize image for faster processing
+  const optimizeImage = async (file: File): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        // Create a canvas to resize the image
+        const canvas = document.createElement("canvas");
+        // Resize to smaller dimensions for faster processing
+        const maxDimension = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDimension) {
+            height = Math.round(height * (maxDimension / width));
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width = Math.round(width * (maxDimension / height));
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw the resized image
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Could not get canvas context"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert canvas to an image element
+        const optimizedImg = new Image();
+        optimizedImg.onload = () => resolve(optimizedImg);
+        optimizedImg.onerror = reject;
+        optimizedImg.src = canvas.toDataURL("image/jpeg", 0.7); // Lower quality for faster processing
+      };
+
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Extract text from ID card using OCR (Tesseract.js) - highly optimized for speed
   const extractTextFromImage = async (image: File): Promise<string> => {
     try {
-      const { data } = await Tesseract.recognize(image, "eng");
+      setLoadingStage("Reading ID card text...");
+
+      // Optimize image before OCR
+      const optimizedImg = await optimizeImage(image);
+
+      // Use minimal settings for faster processing
+      // Use type assertion to fix TypeScript error
+      const { data } = await Tesseract.recognize(optimizedImg.src, "eng", {
+        logger: (m) => console.log("OCR progress:", m),
+      } as Tesseract.WorkerOptions);
+
       return data.text;
     } catch (error) {
       console.error("OCR error:", error);
@@ -96,16 +171,28 @@ export default function FaceRecognition() {
     }
   };
 
-  // Extract face descriptor from ID card
+  // Extract face descriptor from ID card - highly optimized for speed
   const extractFaceDescriptor = async (
     image: File
   ): Promise<Float32Array | null> => {
     try {
-      const img = await faceapi.bufferToImage(image);
+      setLoadingStage("Detecting face on ID card...");
+
+      // Optimize image before face detection
+      const optimizedImg = await optimizeImage(image);
+
+      // Use TinyFaceDetector which is faster than SSD Mobilenet
       const detections = await faceapi
-        .detectSingleFace(img)
-        .withFaceLandmarks()
+        .detectSingleFace(
+          optimizedImg,
+          new faceapi.TinyFaceDetectorOptions({
+            inputSize: 160,
+            scoreThreshold: 0.3,
+          })
+        )
+        .withFaceLandmarks(true) // Use tiny landmarks model
         .withFaceDescriptor();
+
       return detections ? detections.descriptor : null;
     } catch (error) {
       console.error("Face extraction error:", error);
@@ -136,24 +223,35 @@ export default function FaceRecognition() {
     setIsLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
+    setFaceVerificationFailed(false);
 
     try {
       console.log("📤 Extracting data from ID card...");
       const extractedText = await extractTextFromImage(idCardImage);
       console.log("🔎 Extracted Text:", extractedText);
 
-      // For demo purposes, always consider the data valid
-      // In a real app, you would validate the extracted text against the form data
-      const isDataValid = true;
+      // Very lenient text matching for faster verification
+      const extractedTextLower = extractedText.toLowerCase();
+      const firstNameLower = formData.firstName.toLowerCase();
+      const lastNameLower = formData.lastName.toLowerCase();
 
-      // Uncomment this for real validation:
-      /*
+      // Check if any part of the name is in the extracted text
+      const isFirstNameFound = extractedTextLower.includes(firstNameLower);
+      const isLastNameFound = extractedTextLower.includes(lastNameLower);
+
+      // Check if ID number is in the extracted text (more strict)
+      const isIdNumberFound = extractedTextLower.includes(formData.idNumber);
+
+      // Age can be in various formats, so be very lenient
+      const isAgeFound =
+        extractedTextLower.includes(formData.age) ||
+        extractedTextLower.includes(`age: ${formData.age}`) ||
+        extractedTextLower.includes(`age ${formData.age}`) ||
+        extractedTextLower.includes(`${formData.age} years`);
+
+      // For demo purposes, require only name and ID to match
       const isDataValid =
-        extractedText.toLowerCase().includes(formData.firstName.toLowerCase()) &&
-        extractedText.toLowerCase().includes(formData.lastName.toLowerCase()) &&
-        extractedText.includes(formData.age) &&
-        extractedText.includes(formData.idNumber)
-      */
+        (isFirstNameFound || isLastNameFound) && isIdNumberFound;
 
       if (isDataValid) {
         console.log("✅ User input matches ID card!");
@@ -179,18 +277,22 @@ export default function FaceRecognition() {
         `⚠️ ${error instanceof Error ? error.message : "Verification failed"}`
       );
       setIsLoading(false);
+      setLoadingStage("");
     }
   };
 
-  // Step 2: Start webcam
+  // Step 2: Start webcam - optimized for faster initialization
   const startVideo = async () => {
     console.log("Starting video initialization...", videoRef.current);
     setCameraStatus("initializing");
+    setLoadingStage("Initializing camera...");
+    setFaceVerificationFailed(false);
 
     if (!videoRef.current) {
       console.error("Video ref not available");
       setErrorMessage("⚠️ Video initialization failed - ref not available");
       setIsLoading(false);
+      setLoadingStage("");
       return;
     }
 
@@ -206,8 +308,13 @@ export default function FaceRecognition() {
       console.log("Requesting camera access...");
       setCameraStatus("requesting_permission");
 
+      // Use very low resolution for much faster processing
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          facingMode: "user",
+          width: { ideal: 240 }, // Very low resolution for faster processing
+          height: { ideal: 180 },
+        },
         audio: false,
       });
 
@@ -261,11 +368,31 @@ export default function FaceRecognition() {
       setCameraStatus("ready");
       setErrorMessage(null);
 
-      // Start face detection with a slight delay to ensure video is stable
-      setTimeout(() => {
-        console.log("Starting face detection...");
-        detectAndCompareFace();
-      }, 1000);
+      // Reset match attempts counter
+      matchAttemptsRef.current = 0;
+
+      // Start face detection immediately
+      detectAndCompareFace();
+
+      // Set a timeout for face matching - if no match after MAX_ATTEMPTS, show error
+      if (faceMatchTimeoutRef.current) {
+        clearTimeout(faceMatchTimeoutRef.current);
+      }
+
+      faceMatchTimeoutRef.current = setTimeout(() => {
+        if (!isVerified && detectionIntervalRef.current) {
+          clearInterval(detectionIntervalRef.current);
+          detectionIntervalRef.current = null;
+          setErrorMessage(
+            "⚠️ Face verification failed. The face does not match the ID card."
+          );
+          setIsLoading(false);
+          setLoadingStage("");
+          setFaceVerificationFailed(true);
+          // Stop the webcam when face verification fails
+          stopVideo();
+        }
+      }, MAX_MATCH_ATTEMPTS * 100 + 1000); // A bit longer than our max attempts
     } catch (error) {
       console.error("Camera initialization error:", error);
       setCameraStatus("error");
@@ -293,10 +420,11 @@ export default function FaceRecognition() {
 
       setErrorMessage(errorMsg);
       setIsLoading(false);
+      setLoadingStage("");
     }
   };
 
-  // Step 3: Detect face and compare it with the ID card face
+  // Step 3: Detect face and compare it with the ID card face - highly optimized for speed
   const detectAndCompareFace = () => {
     if (!videoRef.current || !idFaceDescriptor) {
       setErrorMessage("⚠️ Video or ID face data not available.");
@@ -305,26 +433,67 @@ export default function FaceRecognition() {
     }
 
     const video = videoRef.current;
+    setLoadingStage("Comparing your face with ID...");
 
     // Clear previous interval if it exists
     if (detectionIntervalRef.current) {
       clearInterval(detectionIntervalRef.current);
     }
 
-    // Start face detection at regular intervals
+    // Process every other frame to reduce CPU usage
+    let frameCount = 0;
+
+    // Start face detection at regular intervals - using a faster interval and lower confidence threshold
     detectionIntervalRef.current = setInterval(async () => {
       if (!video || !idFaceDescriptor) return;
 
+      // Increment match attempts
+      matchAttemptsRef.current++;
+
+      // If we've exceeded max attempts, stop trying
+      if (matchAttemptsRef.current > MAX_MATCH_ATTEMPTS) {
+        if (detectionIntervalRef.current) {
+          clearInterval(detectionIntervalRef.current);
+          detectionIntervalRef.current = null;
+        }
+        setErrorMessage(
+          "⚠️ Face verification failed. The face does not match the ID card."
+        );
+        setIsLoading(false);
+        setLoadingStage("");
+        setFaceVerificationFailed(true);
+        // Stop the webcam when face verification fails
+        stopVideo();
+        return;
+      }
+
+      // Skip every other frame for better performance
+      frameCount++;
+      if (frameCount % 2 !== 0) return;
+
+      // Skip if already processing an image
+      if (processingImageRef.current) return;
+
+      processingImageRef.current = true;
+
       try {
+        // Use TinyFaceDetector which is much faster than SSD Mobilenet
         const detections = await faceapi
-          .detectSingleFace(video)
-          .withFaceLandmarks()
+          .detectSingleFace(
+            video,
+            new faceapi.TinyFaceDetectorOptions({
+              inputSize: 160, // Smaller input size for faster processing
+              scoreThreshold: 0.3, // Lower threshold for faster detection
+            })
+          )
+          .withFaceLandmarks(true) // Use tiny landmarks model
           .withFaceDescriptor();
 
         if (!detections) {
           setErrorMessage(
             "⚠️ Please position your face in the center of the camera."
           );
+          processingImageRef.current = false;
           return;
         }
 
@@ -337,26 +506,40 @@ export default function FaceRecognition() {
         );
         console.log("🔍 Face match distance:", distance);
 
-        // Check if faces match within a threshold (lower value = better match)
+        // Use a reasonable threshold for matching (0.6)
+        // Lower values = stricter matching, higher values = more lenient
         if (distance < 0.6) {
-          // Stop the interval
+          // Stop the interval and timeout
           if (detectionIntervalRef.current) {
             clearInterval(detectionIntervalRef.current);
             detectionIntervalRef.current = null;
+          }
+          if (faceMatchTimeoutRef.current) {
+            clearTimeout(faceMatchTimeoutRef.current);
+            faceMatchTimeoutRef.current = null;
           }
 
           setIsVerified(true);
           setIsLoading(false);
           setSuccessMessage("✅ Registered successfully!");
+          setLoadingStage("");
           console.log("✅ Face matched! Verification successful.");
 
           // Stop webcam once verified
           stopVideo();
+        } else {
+          // Face detected but not matching
+          console.log(
+            `Face detected but not matching. Attempt ${matchAttemptsRef.current}/${MAX_MATCH_ATTEMPTS}`
+          );
         }
+
+        processingImageRef.current = false;
       } catch (error) {
         console.error("Face detection error:", error);
+        processingImageRef.current = false;
       }
-    }, 500); // Check every 500ms for better performance
+    }, 100); // Check every 100ms
   };
 
   // Stop webcam stream
@@ -371,12 +554,28 @@ export default function FaceRecognition() {
     }
   };
 
+  // Retry face verification
+  const handleRetryFaceVerification = () => {
+    // Clear error message
+    setErrorMessage(null);
+    // Reset match attempts
+    matchAttemptsRef.current = 0;
+    // Reset face verification failed state
+    setFaceVerificationFailed(false);
+    // Start video again
+    startVideo();
+  };
+
   // Reset everything
   const handleReset = () => {
     stopVideo();
     if (detectionIntervalRef.current) {
       clearInterval(detectionIntervalRef.current);
       detectionIntervalRef.current = null;
+    }
+    if (faceMatchTimeoutRef.current) {
+      clearTimeout(faceMatchTimeoutRef.current);
+      faceMatchTimeoutRef.current = null;
     }
 
     setFormData({
@@ -394,6 +593,9 @@ export default function FaceRecognition() {
     setIsLoading(false);
     setShowCamera(false);
     setCameraStatus("waiting");
+    setLoadingStage("");
+    matchAttemptsRef.current = 0;
+    setFaceVerificationFailed(false);
   };
 
   // For testing - manually trigger camera
@@ -515,6 +717,14 @@ export default function FaceRecognition() {
               </div>
             </div>
 
+            {/* Loading spinner indicator */}
+            {isLoading && loadingStage && (
+              <div className="mt-4 flex items-center justify-center flex-col">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-2"></div>
+                <div className="text-sm text-center">{loadingStage}</div>
+              </div>
+            )}
+
             <div className="mt-6 flex justify-center">
               {!isIdVerified ? (
                 <button
@@ -553,7 +763,7 @@ export default function FaceRecognition() {
             )}
 
             <div className="mt-6" ref={videoContainerRef}>
-              {isIdVerified && (
+              {isIdVerified && !faceVerificationFailed && (
                 <div className="space-y-2">
                   <div className="rounded-lg overflow-hidden border-2 border-blue-500">
                     <video
@@ -566,10 +776,13 @@ export default function FaceRecognition() {
                       className="rounded-lg w-full h-auto bg-gray-100"
                       style={{ minHeight: "360px" }}
                     />
+                    <canvas ref={canvasRef} className="hidden" />
                   </div>
-                  {/* Debug info */}
-                  <div className="text-xs text-gray-500 text-center">
-                    Camera status: {cameraStatus}
+
+                  {/* Status info */}
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Camera: {cameraStatus}</span>
+                    {loadingStage && <span>{loadingStage}</span>}
                   </div>
 
                   {/* Manual camera trigger for testing */}
@@ -587,7 +800,19 @@ export default function FaceRecognition() {
               )}
             </div>
 
-            {isIdVerified && !isVerified && (
+            {/* Retry button for face verification */}
+            {isIdVerified && faceVerificationFailed && (
+              <div className="text-center mt-4">
+                <button
+                  onClick={handleRetryFaceVerification}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  Retry Face Verification
+                </button>
+              </div>
+            )}
+
+            {isIdVerified && !isVerified && !faceVerificationFailed && (
               <div className="text-center text-sm text-gray-500 mt-2">
                 Face verification in progress...
               </div>
