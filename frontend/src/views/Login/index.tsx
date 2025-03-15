@@ -1,10 +1,17 @@
 import logo from "../../assets/Logo9oufa.png"
 import da2ira from "../../assets/da2ira.png"
+import { useNavigate } from "react-router-dom";
 import { useState } from "react"
 
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+
+  const navigate = useNavigate();
+
+  const goToRegister = () => {
+    navigate("/register"); 
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -13,7 +20,6 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen bg-[#FEF9E1] p-0 m-0">
-      {/* Left Side - Login Form */}
       <div className="w-full lg:w-[50%] p-8 flex flex-col justify-between">
         <div className="mb-12">
           <div className="flex items-center gap-2">
@@ -92,7 +98,7 @@ export default function Login() {
 
           <p className="mt-8 text-center text-sm text-gray-600">
             Or don't have an account yet?{" "}
-            <a href="#" className="text-[#C14817] hover:underline font-medium">
+            <a onClick={goToRegister} className="text-[#C14817] hover:underline font-medium cursor-pointer">
               Register
             </a>
           </p>
@@ -104,7 +110,7 @@ export default function Login() {
             <img
             src={da2ira}
             alt="Illustration"
-            className="h-full object-cover w-[110%]" // Adjusted width
+            className="h-full object-cover w-[110%]" 
             />
         </div>
       </div>
