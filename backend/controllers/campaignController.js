@@ -40,4 +40,34 @@ const donateToCampaign = async (req, res) => {
     }
 };
 
-module.exports = { createCampaign, updateCampaign, donateToCampaign };
+const getCampaign = async (req, res) => {
+    try {
+        // If a campaign ID is passed as a parameter, find it by ID
+        if (req.params.id) {
+            const campaign = await DonationCampaign.findById(req.params.id);
+            if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+            return res.status(200).json({ campaign });
+        }
+
+        // If a search query parameter 'name' is provided, search by name
+        const { name } = req.query;
+        if (name) {
+            const campaigns = await DonationCampaign.find({
+                name: { $regex: name, $options: "i" }, // Case-insensitive search
+            });
+            if (campaigns.length === 0) {
+                return res.status(404).json({ message: "No campaigns found" });
+            }
+            return res.status(200).json({ campaigns });
+        }
+
+        // If neither 'id' nor 'name' is provided, return all campaigns
+        const campaigns = await DonationCampaign.find();
+        res.status(200).json({ campaigns });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+module.exports = { createCampaign, updateCampaign, donateToCampaign, getCampaign };
+
