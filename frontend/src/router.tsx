@@ -5,6 +5,7 @@ import Donate from "./views/Donate";
 import Register from "./views/Register";
 import Login from "./views/Login";
 import Profile from "./components/Profile";
+import MyDonations from "./components/MyDonations";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
       { path: "", element: <Home /> },
       { path: "/donate", element: <Donate /> },
       { path: "/profile", element: <Profile /> },
+      { path: "/my-donations", element: <MyDonations /> },
     ],
   },
   { path: "/register", element: <Register /> },
