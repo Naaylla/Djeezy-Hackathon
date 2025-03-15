@@ -15,6 +15,9 @@ export function useFaceVerification() {
     lastName: "",
     age: "",
     idNumber: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
   })
   const [idCardImage, setIdCardImage] = useState<File | null>(null)
   const [idFaceDescriptor, setIdFaceDescriptor] = useState<Float32Array | null>(null)
@@ -356,6 +359,10 @@ export function useFaceVerification() {
       lastName: "",
       age: "",
       idNumber: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+
     })
     setIdCardImage(null)
     setIdFaceDescriptor(null)

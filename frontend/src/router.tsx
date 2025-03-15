@@ -16,7 +16,6 @@ const router = createBrowserRouter([
       { path: "/donate", element: <Donate /> },
     ],
   },
-  { path: "/register", element: <Register /> } 
 ]);
 
 export default function Routes() {
