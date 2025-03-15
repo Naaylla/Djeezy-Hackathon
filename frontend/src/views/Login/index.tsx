@@ -1,9 +1,10 @@
-import logo from "../../assets/Logo9oufa.png"
+import React, { useState } from 'react';
+import logo from '../../assets/Logo9oufa.png';
 import da2ira from "../../assets/da2ira.png"
 import { useNavigate } from "react-router-dom";
-import { useState } from "react"
 
 export default function Login() {
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
@@ -14,16 +15,25 @@ export default function Login() {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log({ email, password })
-  }
+    e.preventDefault();
+    console.log({ email, password });
+  };
+
+  const handleLogoClick = () => {
+    navigate('/');
+  };
 
   return (
     <div className="flex min-h-screen bg-[#FEF9E1] p-0 m-0">
       <div className="w-full lg:w-[50%] p-8 flex flex-col justify-between">
         <div className="mb-12">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="9OUFA Logo" className="max-h-[100px] text-[#C14817] mt-8 ml-8" />
+            <img
+              src={logo}
+              alt="9OUFA Logo"
+              className="max-h-[100px] text-[#C14817] mt-8 ml-8 cursor-pointer"
+              onClick={handleLogoClick}
+            />
           </div>
         </div>
 
@@ -85,7 +95,7 @@ export default function Login() {
                 />
                 <path
                   fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
                 />
                 <path
                   fill="#EA4335"
@@ -97,7 +107,7 @@ export default function Login() {
           </form>
 
           <p className="mt-8 text-center text-sm text-gray-600">
-            Or don't have an account yet?{" "}
+            Or don't have an account yet?{' '}
             <a onClick={goToRegister} className="text-[#C14817] hover:underline font-medium cursor-pointer">
               Register
             </a>
@@ -107,7 +117,7 @@ export default function Login() {
 
       <div className="hidden lg:block w-[50%] relative ml-auto overflow-hidden">
         <div className="absolute top-0 right-0 h-full w-full">
-            <img
+          <img
             src={da2ira}
             alt="Illustration"
             className="h-full object-cover w-[110%]" 
@@ -115,5 +125,5 @@ export default function Login() {
         </div>
       </div>
     </div>
-  )
+  );
 }

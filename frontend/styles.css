@@ -20,6 +20,10 @@
   }
 }
 
+body {
+  background-color: #FEF9E1;
+}
+
 .animate-scroll-left {
   animation: scroll-left linear infinite var(--animation-duration, 8s);
   white-space: nowrap;
