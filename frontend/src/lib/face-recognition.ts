@@ -6,6 +6,9 @@ export interface FormData {
   lastName: string
   age: string
   idNumber: string
+  email: string
+  password: string
+  confirmPassword: string
 }
 
 export interface VerificationResults {
