@@ -6,7 +6,6 @@ const Footer: React.FC = () => {
     <footer style={{ backgroundColor: '#E5D0AC' }} className="text-black py-6">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-between items-center">
-          {/* Social Media */}
           <div className="w-full md:w-1/3 mb-6 md:mb-0">
             <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-4">
@@ -17,7 +16,6 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Links - Expanded Horizontally */}
           <div className="w-full md:w-2/3 mb-6 md:mb-0">
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="flex flex-wrap space-x-6">
@@ -32,7 +30,6 @@ const Footer: React.FC = () => {
           
         </div>
 
-        {/* Copyright */}
         <div className="border-t border-black mt-6 pt-6 text-center">
           <p>&copy; {new Date().getFullYear()} Your Company. All rights reserved.</p>
         </div>

@@ -5,7 +5,6 @@ import { useIntersectionObserver } from "../../lib/use-intersection-observer";
 import { useEffect, useState } from "react";
 import ImageCarousel from "../image carousel/ImageCarousel";
 
-// Import your hero images
 import hero_pic from "../../assets/hero/hero-pic.png";
 import hero_button from "../../assets/hero/hero-button.svg";
 import hero_skew from "../../assets/hero/hero-skew.svg";
@@ -38,11 +37,12 @@ export default function Hero() {
         />
 
         <div className="absolute right-0 top-0 w-full h-full z-0">
-          <ImageCarousel
-            images={heroImages}
-            interval={6000}
-            className="absolute right-0 top-0 w-auto h-full object-cover z-0"
-          />
+        <ImageCarousel
+  images={heroImages}
+  interval={6000}
+  className="absolute right-0 top-0 max-w-none h-full object-contain object-center z-0"
+/>
+
         </div>
 
         <div className="relative z-20 ml-20">

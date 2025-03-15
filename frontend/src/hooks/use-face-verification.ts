@@ -108,7 +108,6 @@ export function useFaceVerification() {
           setIsIdVerified(true)
           setShowCamera(true)
         } else {
-          // Provide more helpful error message for face detection failure
           throw new Error("No face detected in the ID card. Please upload a clearer image with a visible face.")
         }
       } else {

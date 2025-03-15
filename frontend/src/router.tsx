@@ -10,10 +10,10 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: "/", element: <Home /> },
-      { path: "/donate", element: <Donate /> },
-      { path: "/register", element: <Register /> }
+      { path: "/donate", element: <Donate /> }
     ],
   },
+  { path: "/register", element: <Register /> } 
 ]);
 
 export default function Routes() {
