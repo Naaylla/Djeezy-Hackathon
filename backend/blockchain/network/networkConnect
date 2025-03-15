@@ -1,0 +1,68 @@
+'use strict';
+
+const { Wallets, Gateway } = require('fabric-network');
+const path = require('path');
+const fs = require('fs');
+const FabricCAServices = require('fabric-ca-client');
+
+const ccpPath = path.resolve(__dirname, 'connection.json');
+const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
+
+async function enrollAdmin() {
+    try {
+        const caInfo = ccp.certificateAuthorities['ca.org1.example.com'];
+        const ca = new FabricCAServices(caInfo.url);
+
+        const walletPath = path.join(process.cwd(), 'blockchain/network/wallet');
+        const wallet = await Wallets.newFileSystemWallet(walletPath);
+        console.log(`✅ Wallet path: ${walletPath}`);
+
+        // Check if admin already exists
+        const adminIdentity = await wallet.get('admin');
+        if (adminIdentity) {
+            console.log('✅ Admin identity already exists in the wallet.');
+            return;
+        }
+
+        // Enroll the admin
+        const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
+        const x509Identity = {
+            credentials: {
+                certificate: enrollment.certificate,
+                privateKey: enrollment.key.toBytes(),
+            },
+            mspId: 'Org1MSP',
+            type: 'X.509',
+        };
+
+        await wallet.put('admin', x509Identity);
+        console.log('✅ Successfully enrolled admin user and stored in wallet.');
+    } catch (error) {
+        console.error('❌ Failed to enroll admin:', error);
+    }
+}
+
+async function getContract() {
+    try {
+        await enrollAdmin(); // Ensure admin is enrolled before proceeding
+
+        const walletPath = path.join(process.cwd(), 'wallet');
+        const wallet = await Wallets.newFileSystemWallet(walletPath);
+        
+        const gateway = new Gateway();
+        await gateway.connect(ccp, { 
+            wallet, 
+            identity: 'admin', 
+            discovery: { enabled: true, asLocalhost: true } // Set to false for real network
+        });
+
+        const network = await gateway.getNetwork('mychannel');
+        console.log('✅ Connected to the network!');
+        return network.getContract('donationContract'); // Ensure this matches your chaincode name
+    } catch (error) {
+        console.error('❌ Failed to get contract:', error);
+        return null;
+    }
+}
+
+module.exports = { enrollAdmin, getContract };
