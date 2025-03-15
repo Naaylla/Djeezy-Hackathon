@@ -29,7 +29,6 @@ export default function ImageCarousel({
     });
   };
 
-  // Handle image rotation
   useEffect(() => {
     if (images.length <= 1) return;
 
@@ -49,7 +48,6 @@ export default function ImageCarousel({
   return (
     <div className={`${className} relative overflow-hidden`}>
       {images.map((image, index) => {
-        // Use a placeholder if the image path is empty
         const imgSrc = image || "/placeholder.svg?height=500&width=800";
 
         return (
@@ -72,7 +70,6 @@ export default function ImageCarousel({
               onError={() => console.error(`Failed to load image: ${imgSrc}`)}
             />
 
-            {/* Debug overlay to show image path */}
             <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white text-xs p-1">
               {imgSrc} (Index: {index}, Current: {currentIndex})
             </div>

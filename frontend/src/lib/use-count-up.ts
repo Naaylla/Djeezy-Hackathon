@@ -14,7 +14,7 @@ interface UseCountUpProps {
 export function useCountUp({
   end,
   start = 0,
-  duration = 2500, // Increased duration for smoother animation
+  duration = 2500,
   delay = 0,
   isInView = true,
   formatter = (value) => value.toString(),
@@ -43,9 +43,8 @@ export function useCountUp({
       const progress = timestamp - startTime;
       const percentage = Math.min(progress / duration, 1);
 
-      // Using a custom easing function for stronger deceleration
       const easing = (t: number) => {
-        return 1 - Math.pow(1 - t, 4); // Stronger easing curve
+        return 1 - Math.pow(1 - t, 4);
       };
 
       const currentCount = Math.floor(

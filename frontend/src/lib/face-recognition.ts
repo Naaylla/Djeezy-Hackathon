@@ -181,7 +181,6 @@ export const loadFaceApiModels = async (onProgress?: (stage: string) => void): P
       faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
       faceapi.nets.faceLandmark68TinyNet.loadFromUri("/models"),
       faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
-      // Add SSD MobileNet as a fallback model - it's better for some types of images
       faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
     ])
 
@@ -214,7 +213,6 @@ export const detectFaceInVideo = async (
       .withFaceLandmarks(true)
       .withFaceDescriptor()
 
-    // Convert undefined to null to match our return type
     return detections || null
   } catch (error) {
     console.error("Face detection error:", error)

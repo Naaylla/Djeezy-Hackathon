@@ -7,15 +7,11 @@ import Register from "./views/Register";
 const router = createBrowserRouter([
   {
     path: "/",
-    // element: <Layout />,
+    element: <Layout />,
     children: [
       { path: "/", element: <Home /> },
       { path: "/donate", element: <Donate /> },
-<<<<<<< HEAD
-      { path: "/register", element: <Home /> },
-=======
       { path: "/register", element: <Register /> },
->>>>>>> origin/lemon-front
     ],
   },
 ]);

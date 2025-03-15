@@ -31,14 +31,12 @@ export default function Hero() {
   return (
     <div className="bg-beige w-full">
       <div className="relative w-full h-[500px] flex items-center bg-beige overflow-hidden">
-        {/* Skewed Background - Above Hero Image */}
         <img
           src={hero_skew || "/placeholder.svg"}
           alt="Skew background"
           className="absolute left-0 top-0 h-full w-auto z-10"
         />
 
-        {/* Hero Image Carousel - Behind Skewed Background */}
         <div className="absolute right-0 top-0 w-full h-full z-0">
           <ImageCarousel
             images={heroImages}
@@ -47,7 +45,6 @@ export default function Hero() {
           />
         </div>
 
-        {/* Text Content - On Top */}
         <div className="relative z-20 ml-20">
           <p className="text-6xl font-bold text-black">9OUFA</p>
           <p className="text-lg text-gray-700">Your gateway to volunteering</p>
@@ -76,7 +73,6 @@ export default function Hero() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-12 max-w-6xl w-full">
-          {/* Row 1 */}
           <AnimatedStat
             value={1}
             label="Families positively impacted"
@@ -101,7 +97,6 @@ export default function Hero() {
             delay={3}
           />
 
-          {/* Row 2 */}
           <AnimatedStat
             value={200000}
             suffix="+"

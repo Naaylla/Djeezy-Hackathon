@@ -17,7 +17,6 @@ export function useIntersectionObserver<T extends HTMLElement>({
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Once it's in view, keep it that way
         if (entry.isIntersecting) {
           setIsInView(true);
           if (ref.current) observer.unobserve(ref.current);
