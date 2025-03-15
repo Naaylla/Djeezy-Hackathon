@@ -1,5 +1,7 @@
 import logo from "../../assets/Logo9oufa.png"
+import da2ira from "../../assets/da2ira.png"
 import { useState } from "react"
+
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -10,13 +12,14 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <div className="w-full lg:w-[45%] bg-[#FEF9E1] p-8 lg:p-12 flex flex-col justify-between relative z-10">
-      <div className="mb-12">
-        <div className="flex items-center gap-2">
-            <img src={logo} alt="9OUFA Logo" className="ml-20 max-h-[100px] text-[#C14817]" />
+    <div className="flex min-h-screen bg-[#FEF9E1] p-0 m-0">
+      {/* Left Side - Login Form */}
+      <div className="w-full lg:w-[50%] p-8 flex flex-col justify-between">
+        <div className="mb-12">
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="9OUFA Logo" className="max-h-[100px] text-[#C14817] mt-8 ml-8" />
+          </div>
         </div>
-      </div>
 
         <div className="max-w-md w-full mx-auto">
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -96,25 +99,15 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="hidden lg:block w-[55%] bg-[#C14817] relative">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-9rRWte6wWH8gtcCNSR1eXtZL9xC008.png"
-            alt="Food donation illustration"
-            className="w-4/5 h-auto object-contain"
-          />
-        </div>
-        <div className="absolute top-0 left-0 h-full w-[100px] transform -translate-x-[99px]">
-          <div
-            className="h-full w-full bg-[#C14817]"
-            style={{
-              borderTopLeftRadius: "100%",
-              borderBottomLeftRadius: "100%",
-            }}
-          ></div>
+      <div className="hidden lg:block w-[50%] relative ml-auto overflow-hidden">
+        <div className="absolute top-0 right-0 h-full w-full">
+            <img
+            src={da2ira}
+            alt="Illustration"
+            className="h-full object-cover w-[110%]" // Adjusted width
+            />
         </div>
       </div>
     </div>
   )
 }
-

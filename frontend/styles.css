@@ -10,9 +10,25 @@
     animation: scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite;
   }
 
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% / (var(--number-of-items) / 2)));
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left linear infinite var(--animation-duration, 8s);
+  white-space: nowrap;
+}
 @theme {
   --color-beige: #fef9e1;
   --color-dark-beige: #e5d0ac;
   --color-yellow: #ff9d23;
   --color-red: #c14600;
 }
+
+
