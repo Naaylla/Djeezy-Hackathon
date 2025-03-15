@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import * as FaceRecognitionLib from "../lib/face-recognition"
+import * as FaceRecognitionLib from "../lib/face-recognition" 
 
 export function useFaceVerification() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -101,13 +101,15 @@ export function useFaceVerification() {
       setDataVerificationResults(results)
 
       if (isValid) {
+        setLoadingStage("Detecting face on ID card...")
         const faceDescriptor = await FaceRecognitionLib.extractFaceDescriptor(idCardImage, setLoadingStage)
         if (faceDescriptor) {
           setIdFaceDescriptor(faceDescriptor)
           setIsIdVerified(true)
           setShowCamera(true)
         } else {
-          throw new Error("No face detected in the ID card")
+          // Provide more helpful error message for face detection failure
+          throw new Error("No face detected in the ID card. Please upload a clearer image with a visible face.")
         }
       } else {
         const failedFields = Object.entries(results)
